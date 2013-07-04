@@ -76,7 +76,6 @@ class NetaxeptTransactionManager(models.Manager):
     def auth_payment(self, payment):
         
         if not payment.completed():
-            print "not completed"
             raise PaymentRegistrationNotCompleted
                  
         client = get_client()
@@ -91,13 +90,11 @@ class NetaxeptTransactionManager(models.Manager):
             transaction_id=payment.transaction_id,
             operation=operation
         )
-        print "Transaction: ", transaction
         try:
             response = process(client, request)
         except suds.WebFault, e:
             handle_response_exception(e, transaction)
 
-        print "response: ", response
         transaction.save()
         return transaction
     
