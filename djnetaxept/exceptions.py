@@ -10,3 +10,6 @@ class AmountAllreadyCaptured(BaseNetaxeptException):
 
 class NoAmountCaptured(BaseNetaxeptException):
     msg = 'No amount captured nothing to CREDIT'
+
+class PaymentRegistrationNotCompleted(BaseNetaxeptException):
+    msg = 'Payment registration is not completed yet'

@@ -2,7 +2,8 @@ import suds
 from django.db import models
 from djnetaxept.utils import get_client, get_basic_registerrequest, get_netaxept_object, handle_response_exception
 from djnetaxept.operations import register, process, query, batch
-from djnetaxept.exceptions import PaymentNotAuthorized, AmountAllreadyCaptured, NoAmountCaptured
+from djnetaxept.exceptions import PaymentNotAuthorized, AmountAllreadyCaptured, NoAmountCaptured, \
+                           PaymentRegistrationNotCompleted
 
 
 class NetaxeptPaymentManager(models.Manager):
@@ -44,10 +45,39 @@ class NetaxeptPaymentManager(models.Manager):
         
 class NetaxeptTransactionManager(models.Manager):
     
+    def sale_payment(self, payment, amount):
+
+        if not payment.completed():
+             raise PaymentRegistrationNotCompleted
+
+        client = get_client()
+        operation = 'SALE'
+
+        request = get_netaxept_object(client, 'ProcessRequest')
+        request.Operation = operation
+        request.TransactionId = payment.transaction_id
+        request.TransactionAmount = amount
+
+        transaction = self.model(
+            payment=payment,
+            transaction_id=payment.transaction_id,
+            amount=amount,
+            operation=operation,
+        )
+
+        try:
+            response = process(client, request)
+        except suds.WebFault, e:
+            handle_response_exception(e, transaction)
+
+        transaction.save()
+        return transaction
+
     def auth_payment(self, payment):
         
         if not payment.completed():
-             raise PaymentRegistrationNotCompleted
+            print "not completed"
+            raise PaymentRegistrationNotCompleted
                  
         client = get_client()
         operation = 'AUTH'
@@ -61,12 +91,13 @@ class NetaxeptTransactionManager(models.Manager):
             transaction_id=payment.transaction_id,
             operation=operation
         )
-        
+        print "Transaction: ", transaction
         try:
             response = process(client, request)
         except suds.WebFault, e:
             handle_response_exception(e, transaction)
-            
+
+        print "response: ", response
         transaction.save()
         return transaction
     
@@ -80,7 +111,7 @@ class NetaxeptTransactionManager(models.Manager):
         request = get_netaxept_object(client, 'ProcessRequest')
         request.Operation = operation
         request.TransactionId = payment.transaction_id
-        request.Amount = amount
+        request.TransactionAmount = amount
         
         transaction = self.model(
             payment=payment,
@@ -110,7 +141,7 @@ class NetaxeptTransactionManager(models.Manager):
         request = get_netaxept_object(client, 'ProcessRequest')
         request.Operation = operation
         request.TransactionId = payment.transaction_id
-        request.Amount = amount
+        request.TransactionAmount = amount
         
         transaction = self.model(
             payment=payment,

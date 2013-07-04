@@ -22,6 +22,9 @@ class NetaxeptPayment(models.Model):
 
     objects = NetaxeptPaymentManager()
     
+    def sale(self):
+        return NetaxeptTransaction.objects.sale_payment(self)
+
     def auth(self):
         return NetaxeptTransaction.objects.auth_payment(self)
 
