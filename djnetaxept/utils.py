@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 WSDL = getattr(settings, 'NETAXEPT_WSDL', 'https://epayment-test.bbs.no/netaxept.svc?wsdl')
 MERCHANTID = getattr(settings, 'NETAXEPT_MERCHANTID', '') # Enter your merchant id here
 TOKEN = getattr(settings, 'NETAXEPT_TOKEN', '') # Enter the password you have received from Netaxept here
-TERMNAL = getattr(settings, 'NETAXEPT_TERMINAL', 'https://epayment-test.bbs.no/Terminal/default.aspx')
+TERMNAL = getattr(settings, 'NETAXEPT_TERMINAL', '')
 CURRENCY_CODE = getattr(settings, 'NETAXEPT_CURRENCY_CODE', 'NOK')
 
 AUTOAUTH = getattr(settings, 'NETAXEPT_AUTOAUTH', None)
